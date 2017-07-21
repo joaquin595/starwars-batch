@@ -1,6 +1,7 @@
 package com.starwars.batch.config;
 
-import com.starwars.batch.tasklet.HellowWorldTasklet;
+import com.starwars.batch.tasklet.HelloWorldTasklet;
+import com.sun.tools.javac.api.ClientCodeWrapper;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -10,24 +11,30 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-//@Configuration
-//@EnableBatchProcessing
+/**
+ * Created by joaquinanton on 21/7/17.
+ */
+
 public class BatchConfiguration {
 
-  @Bean
-  public Step helloWorldStep(StepBuilderFactory stepBuilderFactory, HellowWorldTasklet hellowWorldTasklet){
-      return stepBuilderFactory
-        .get("helloWorldStep")
-        .tasklet(hellowWorldTasklet)
-        .build();
-  }
+    @Bean
+    public Step helloWorldStep(StepBuilderFactory stepBuilderFactory,
+                               HelloWorldTasklet helloWorldTasklet){
 
-  @Bean
-  public Job job(JobBuilderFactory jobBuilderFactory, Step helloWorldStep){
-    return jobBuilderFactory
-      .get("job")
-      .incrementer(new RunIdIncrementer())
-      .start(helloWorldStep)
-      .build();
-  }
+        return stepBuilderFactory
+                .get("helloWorldStep")
+                .tasklet(helloWorldTasklet)
+                .build();
+    }
+
+    @Bean
+    public Job hellowWorldJob(JobBuilderFactory jobBuilderFactory,
+                              Step hellowWorldStep) {
+
+        return jobBuilderFactory
+                .get("hellowWorldJob")
+                .incrementer(new RunIdIncrementer())
+                .start(hellowWorldStep)
+                .build();
+    }
 }

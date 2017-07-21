@@ -7,14 +7,21 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+/**
+ * Created by joaquinanton on 21/7/17.
+ */
+
 @Component
-public class HellowWorldTasklet implements Tasklet{
+@Slf4j
+public class HelloWorldTasklet implements Tasklet{
 
-  @Override
-  public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-    log.info("Hello World");
+    @Override
+    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
 
-    return RepeatStatus.FINISHED;
-  }
+        log.info("hello world");
+
+        return RepeatStatus.FINISHED;
+    }
+
+
 }

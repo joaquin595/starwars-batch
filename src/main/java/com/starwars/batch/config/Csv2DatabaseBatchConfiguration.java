@@ -1,8 +1,11 @@
 package com.starwars.batch.config;
 
 import com.starwars.batch.domain.People;
+import com.starwars.batch.listener.PeopleStepListener;
+import com.starwars.batch.repository.PeopleRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -10,6 +13,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -19,12 +23,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Repository;
 
 /**
  * Created by joaquinanton on 21/7/17.
  */
-public class Csv2XmlBatchConfiguration {
+
+public class Csv2DatabaseBatchConfiguration {
 
     @Bean
     public ItemReader<People> peopleReader(){
@@ -47,17 +53,13 @@ public class Csv2XmlBatchConfiguration {
         return itemReader;
     }
 
-    @Bean(destroyMethod = "")
-    public ItemWriter<People> peopleWriter(){
-        StaxEventItemWriter<People> itemWriter = new StaxEventItemWriter<>();
-        itemWriter.setResource(new FileSystemResource("src/main/resources/people.xml"));
-        itemWriter.setRootTagName("peoples");
-        itemWriter.setOverwriteOutput(true);
+    @Bean
+    public ItemWriter<People> itemWriter(PeopleRepository peopleRepository){
 
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        marshaller.setClassesToBeBound(People.class);
+        RepositoryItemWriter<People> itemWriter = new RepositoryItemWriter<>();
+        itemWriter.setRepository(peopleRepository);
+        itemWriter.setMethodName("save");
 
-        itemWriter.setMarshaller(marshaller);
         return itemWriter;
     }
 
@@ -65,10 +67,12 @@ public class Csv2XmlBatchConfiguration {
     public Step csvStep(StepBuilderFactory stepBuilderFactory,
                         ItemWriter itemWriter,
                         ItemReader itemReader,
-                        ItemProcessor itemProcessor){
+                        ItemProcessor itemProcessor,
+                        PeopleStepListener peopleStepListener){
 
         return stepBuilderFactory.get("csvStep")
                 .chunk(10)
+                .listener(peopleStepListener)
                 .reader(itemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)
@@ -93,7 +97,7 @@ public class Csv2XmlBatchConfiguration {
     }
     @Bean
     public Job csvJob(JobBuilderFactory jobBuilderFactory,
-                              Step csvStep) {
+                      Step csvStep) {
 
         return jobBuilderFactory
                 .get("csvStep")

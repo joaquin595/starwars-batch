@@ -1,5 +1,9 @@
 package com.starwars.batch.launcher;
 
+/**
+ * Created by joaquinanton on 21/7/17.
+ */
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -12,21 +16,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-@Component
-public class SwapiJobLauncher {
-  @Autowired
-  private JobLauncher jobLauncher;
+public class RestLauncher {
 
-  @Autowired
-  private Job job;
+    @Autowired
+    private JobLauncher jobLauncher;
 
-  @Scheduled(fixedDelay = 120000)
-  public void run() throws JobParametersInvalidException,
-                            JobExecutionAlreadyRunningException,
-                            JobRestartException,
-                            JobInstanceAlreadyCompleteException {
+    @Autowired
+    private Job job;
 
-    JobParameters jobParameters = new JobParametersBuilder().addLong("time",System.currentTimeMillis()).toJobParameters();
-    jobLauncher.run(job, jobParameters);
-  }
+    @Scheduled(fixedDelay = 120000)
+    public void run() throws JobParametersInvalidException,
+            JobExecutionAlreadyRunningException,
+            JobRestartException,
+            JobInstanceAlreadyCompleteException {
+
+        JobParameters jobParameters = new JobParametersBuilder().addLong("time",System.currentTimeMillis()).toJobParameters();
+        jobLauncher.run(job, jobParameters);
+    }
 }
